@@ -8,7 +8,7 @@ let cors=require('cors');
 let app=express();
 app.use(express.json());
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://loudmusics.vercel.app'],
+    origin: ['http://localhost:3000', 'https://loudmusics.vercel.app/login'],
     credentials: true, // Allow cookies and authentication headers
 }));
 app.use(cookieParser());
