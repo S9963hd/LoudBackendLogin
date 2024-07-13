@@ -8,7 +8,7 @@ let cors=require('cors');
 let app=express();
 app.use(express.json());
 app.use(cors({
-    origin: 'https://loudmusics.vercel.app/login', // Your frontend's origin
+    origin: ['https://loudmusics.vercel.app/login','http://localhost:3000'], // Your frontend's origin
     credentials: true,
     }
 ));
