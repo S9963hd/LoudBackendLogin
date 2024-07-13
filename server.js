@@ -3,10 +3,12 @@ let mongoose=require('mongoose');
 let {model}=require('./Model');
 let jwt=require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const cookieParser = require('cookie-parser');
 let cors=require('cors');
 let app=express();
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
 function encoding(email,password){
     return jwt.sign(password,email);
@@ -16,7 +18,7 @@ app.post('/login',async(req,res)=>{
     try{
        let result=await model.findOne({email:req.body.email,password:encoding(req.body.email,req.body.password)});
        console.log(result);
-       (result)?res.status(200).json({email:result.email}):res.sendStatus(401);
+       (result)?res.status(200).cookie("auth",{email:result.email},{maxAge:900*2000,httpOnly:false}):res.sendStatus(401);
     }
     catch(err){
         res.sendStatus(500);
