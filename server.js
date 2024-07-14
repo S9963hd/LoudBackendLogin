@@ -1,21 +1,29 @@
-let express=require('express');
-let mongoose=require('mongoose');
-let {model}=require('./Model');
-let jwt=require('jsonwebtoken');
+const express = require('express');
+const mongoose = require('mongoose');
+const { model } = require('./Model');
+const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
-let cors=require('cors');
-let app=express();
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 8080;
+
+// Middleware
 app.use(express.json());
 app.use(cors({
-    origin:'https://loudmusics.vercel.app',
+    origin: 'https://loudmusics.vercel.app',
     credentials: true, // Allow cookies and authentication headers
 }));
 app.use(cookieParser());
-app.use(express.urlencoded({extended:true}));
-function encoding(email,password){
-    return jwt.sign(password,email);
-} 
+app.use(express.urlencoded({ extended: true }));
+
+// JWT encoding function
+function encoding(email, password) {
+    return jwt.sign(password, email);
+}
+
+// Login endpoint
 app.post('/login', async (req, res) => {
     console.log(req.body);
     try {
@@ -26,21 +34,22 @@ app.post('/login', async (req, res) => {
             const cookieSettings = {
                 maxAge: 900 * 2000,  // Adjust as needed
                 httpOnly: true,
-                secure: true  // Ensure cookies are only sent over HTTPS
+                secure: true,  // Ensure cookies are only sent over HTTPS
+                sameSite: 'None'  // Ensure cross-site cookies are allowed
             };
 
             // Set the appropriate SameSite attribute based on browser
-            // const userAgent = req.headers['user-agent'];
-            // if (userAgent.includes('Chrome/') || userAgent.includes('Chromium/')) {
-            //     // Google Chrome and Chromium-based browsers
-            //     cookieSettings.sameSite = 'None';
-            // } else if (userAgent.includes('Firefox/')) {
-            //     // Mozilla Firefox
-            //     cookieSettings.sameSite = 'Lax';
-            // } else {
-            //     // Default to Strict for other browsers (including Safari)
-            //     cookieSettings.sameSite = 'Strict';
-            // }
+            const userAgent = req.headers['user-agent'];
+            if (userAgent.includes('Chrome/') || userAgent.includes('Chromium/')) {
+                // Google Chrome and Chromium-based browsers
+                cookieSettings.sameSite = 'None';
+            } else if (userAgent.includes('Firefox/')) {
+                // Mozilla Firefox
+                cookieSettings.sameSite = 'Lax';
+            } else {
+                // Default to Strict for other browsers (including Safari)
+                cookieSettings.sameSite = 'Strict';
+            }
 
             res.cookie('auth', JSON.stringify({ email: result.email }), cookieSettings).send({ message: "Cookie Set" });
         } else {
@@ -53,19 +62,27 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/signup',async (req,res)=>{
-    try{
-        let check= await model.findOne({email:req.body.email});
-        (!check)?await model.create({email:req.body.email,password:encoding(req.body.email,req.body.password)}):res.sendStatus(403);
-        res.sendStatus(200);
-    }catch(err){
+// Signup endpoint
+app.post('/signup', async (req, res) => {
+    try {
+        let check = await model.findOne({ email: req.body.email });
+        if (!check) {
+            await model.create({ email: req.body.email, password: encoding(req.body.email, req.body.password) });
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(403); // User already exists
+        }
+    } catch (err) {
+        console.error(err);  // Log the error for debugging
         res.sendStatus(500);
     }
-})
+});
+
+// Forgot password endpoint
 app.post('/forgot', async (req, res) => {
     console.log("requesting", req.body);
-    let user = await model.findOne({ email: req.body.email });
     try {
+        let user = await model.findOne({ email: req.body.email });
         if (user) {
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
@@ -75,7 +92,7 @@ app.post('/forgot', async (req, res) => {
                 }
             });
 
-            async function main(email, password) {
+            async function sendMail(email, password) {
                 const info = await transporter.sendMail({
                     from: '"From Sanjay Password Regarding..." <sanj25524@gmail.com>',
                     to: email,
@@ -87,14 +104,19 @@ app.post('/forgot', async (req, res) => {
                 console.log("Message sent: %s", info.messageId);
             }
 
-            main(req.body.email, jwt.verify(user.password, user.email));
+            sendMail(req.body.email, jwt.verify(user.password, user.email));
             res.status(201).json({ "message": "Email sent successfully" });
         } else {
             res.status(401).json({ "message": "User not found" });
         }
     } catch (err) {
-        console.log(err);
+        console.error(err);  // Log the error for debugging
         res.sendStatus(500);
     }
 });
-mongoose.connect('mongodb+srv://sanjaysoman46:sanjay123@frisson.1nliflp.mongodb.net/?retryWrites=true&w=majority&appName=frisson').then(()=>app.listen(8080,()=>console.log("Server Connected"))).catch(err=>console.log(err,"Error At Connection"));
+
+// MongoDB Connection
+mongoose.connect('mongodb+srv://sanjaysoman46:sanjay123@frisson.1nliflp.mongodb.net/?retryWrites=true&w=majority&appName=frisson')
+    .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
+    .catch(err => console.error("Error at MongoDB connection:", err));
+
