@@ -16,11 +16,6 @@ app.use(cors({
 }));
 app.use(cookieParser());
 
-// MongoDB connection
-mongoose.connect('mongodb+srv://username:password@clustername.mongodb.net/dbname')
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
-
 // JWT token encoding function
 function encoding(email, password) {
     return jwt.sign(password, email);
@@ -104,4 +99,7 @@ app.post('/forgot', async (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+mongoose.connect('mongodb+srv://sanjaysoman46:sanjay123@frisson.1nliflp.mongodb.net/frisson?retryWrites=true&w=majority&appName=frisson')
+    .then(() => app.listen(8080, () => console.log("Server Connected")))
+    .catch(err => console.error("Error connecting to MongoDB:", err));
+
