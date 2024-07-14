@@ -25,7 +25,7 @@ app.post('/login', async (req, res) => {
             res.status(200).cookie("auth", JSON.stringify({ email: result.email }), {
                 maxAge: 900 * 2000, 
                 httpOnly: false, 
-                sameSite: 'Lax', 
+                sameSite: 'None', 
                 secure: true 
             }).send({ message: "Cookie Set" });
         } else {
