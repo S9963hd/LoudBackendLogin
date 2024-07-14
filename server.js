@@ -30,7 +30,7 @@ app.post('/login', async (req, res) => {
                 sameSite:'Lax'
             };
 
-            Set the appropriate SameSite attribute based on browser
+            //Set the appropriate SameSite attribute based on browser
             const userAgent = req.headers['user-agent'];
             if (userAgent.includes('Chrome/') || userAgent.includes('Chromium/')) {
                 // Google Chrome and Chromium-based browsers
