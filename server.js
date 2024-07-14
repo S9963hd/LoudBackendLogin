@@ -16,18 +16,26 @@ app.use(express.urlencoded({extended:true}));
 function encoding(email,password){
     return jwt.sign(password,email);
 } 
-app.post('/login',async(req,res)=>{
+app.post('/login', async (req, res) => {
     console.log(req.body);
-    try{
-       let result=await model.findOne({email:req.body.email,password:encoding(req.body.email,req.body.password)});
-       console.log(result);
-       (result)?res.status(200).cookie("auth",JSON.stringify({email:result.email}),{ maxAge: 900 * 2000, httpOnly: true, sameSite: 'Lax', secure: true }).send({message:"Cookie Setted"}):res.sendStatus(401);
-       console.log("DOne");
-    }
-    catch(err){
+    try {
+        let result = await model.findOne({ email: req.body.email, password: encoding(req.body.email, req.body.password) });
+        console.log(result);
+        if (result) {
+            res.status(200).cookie("auth", JSON.stringify({ email: result.email }), {
+                maxAge: 900 * 2000, 
+                httpOnly: true, 
+                sameSite: 'Lax', 
+                secure: true 
+            }).send({ message: "Cookie Set" });
+        } else {
+            res.sendStatus(401);
+        }
+        console.log("Done");
+    } catch (err) {
         res.sendStatus(500);
     }
-})
+});
 app.post('/signup',async (req,res)=>{
     try{
         let check= await model.findOne({email:req.body.email});
