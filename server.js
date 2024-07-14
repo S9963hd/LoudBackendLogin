@@ -22,21 +22,37 @@ app.post('/login', async (req, res) => {
         let result = await model.findOne({ email: req.body.email, password: encoding(req.body.email, req.body.password) });
         console.log(result);
         if (result) {
-           res.cookie('auth', JSON.stringify({ email: result.email }), {
-                maxAge: 900 * 2000,
+            // Example of setting cookies based on browser compatibility
+            const cookieSettings = {
+                maxAge: 900 * 2000,  // Adjust as needed
                 httpOnly: true,
-                sameSite: 'Lax',  // Ensure cookies are sent cross-site
-                secure: true       // Ensure cookies are only sent over HTTPS
-            }).send({ message: "Cookie Set" });
+                secure: true  // Ensure cookies are only sent over HTTPS
+            };
 
+            // Set the appropriate SameSite attribute based on browser
+            const userAgent = req.headers['user-agent'];
+            if (userAgent.includes('Chrome/') || userAgent.includes('Chromium/')) {
+                // Google Chrome and Chromium-based browsers
+                cookieSettings.sameSite = 'None';
+            } else if (userAgent.includes('Firefox/')) {
+                // Mozilla Firefox
+                cookieSettings.sameSite = 'Lax';
+            } else {
+                // Default to Strict for other browsers (including Safari)
+                cookieSettings.sameSite = 'Strict';
+            }
+
+            res.cookie('auth', JSON.stringify({ email: result.email }), cookieSettings).send({ message: "Cookie Set" });
         } else {
             res.sendStatus(401);
         }
         console.log("Done");
     } catch (err) {
+        console.error(err);  // Log the error for debugging
         res.sendStatus(500);
     }
 });
+
 app.post('/signup',async (req,res)=>{
     try{
         let check= await model.findOne({email:req.body.email});
