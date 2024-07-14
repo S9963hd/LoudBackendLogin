@@ -25,7 +25,7 @@ app.post('/login', async (req, res) => {
             res.status(200).cookie("auth", JSON.stringify({ email: result.email }),  {
                 maxAge: 900 * 2000,
                 httpOnly: true, // Make sure the cookie is only accessible by the web server
-                sameSite: 'Lax', // Helps protect against CSRF attacks
+                sameSite: 'None', // Helps protect against CSRF attacks
                 secure: true // Ensure the cookie is only sent over HTTPS
             }).send({ message: "Cookie Set" });
         } else {
