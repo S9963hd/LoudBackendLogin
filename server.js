@@ -22,12 +22,13 @@ app.post('/login', async (req, res) => {
         let result = await model.findOne({ email: req.body.email, password: encoding(req.body.email, req.body.password) });
         console.log(result);
         if (result) {
-            res.status(200).cookie("auth", JSON.stringify({ email: result.email }),  {
+           res.cookie('auth', JSON.stringify({ email: result.email }), {
                 maxAge: 900 * 2000,
-                httpOnly: true, // Make sure the cookie is only accessible by the web server
-                sameSite: 'None', // Helps protect against CSRF attacks
-                secure: true // Ensure the cookie is only sent over HTTPS
+                httpOnly: true,
+                sameSite: 'None',  // Ensure cookies are sent cross-site
+                secure: true       // Ensure cookies are only sent over HTTPS
             }).send({ message: "Cookie Set" });
+
         } else {
             res.sendStatus(401);
         }
