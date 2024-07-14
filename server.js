@@ -33,12 +33,15 @@ app.post('/login', async (req, res) => {
             //Set the appropriate SameSite attribute based on browser
             const userAgent = req.headers['user-agent'];
             if (userAgent.includes('Chrome/') || userAgent.includes('Chromium/')) {
+                console.log("Chrome");
                 // Google Chrome and Chromium-based browsers
                 cookieSettings.sameSite = 'None';
             } else if (userAgent.includes('Firefox/')) {
                 // Mozilla Firefox
+                console.log("FireFox");
                 cookieSettings.sameSite = 'Lax';
             } else {
+                console.log("Safari");
                 // Default to Strict for other browsers (including Safari)
                 cookieSettings.sameSite = 'Strict';
             }
