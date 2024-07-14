@@ -30,17 +30,17 @@ app.post('/login', async (req, res) => {
             };
 
             // Set the appropriate SameSite attribute based on browser
-            const userAgent = req.headers['user-agent'];
-            if (userAgent.includes('Chrome/') || userAgent.includes('Chromium/')) {
-                // Google Chrome and Chromium-based browsers
-                cookieSettings.sameSite = 'None';
-            } else if (userAgent.includes('Firefox/')) {
-                // Mozilla Firefox
-                cookieSettings.sameSite = 'Lax';
-            } else {
-                // Default to Strict for other browsers (including Safari)
-                cookieSettings.sameSite = 'Strict';
-            }
+            // const userAgent = req.headers['user-agent'];
+            // if (userAgent.includes('Chrome/') || userAgent.includes('Chromium/')) {
+            //     // Google Chrome and Chromium-based browsers
+            //     cookieSettings.sameSite = 'None';
+            // } else if (userAgent.includes('Firefox/')) {
+            //     // Mozilla Firefox
+            //     cookieSettings.sameSite = 'Lax';
+            // } else {
+            //     // Default to Strict for other browsers (including Safari)
+            //     cookieSettings.sameSite = 'Strict';
+            // }
 
             res.cookie('auth', JSON.stringify({ email: result.email }), cookieSettings).send({ message: "Cookie Set" });
         } else {
