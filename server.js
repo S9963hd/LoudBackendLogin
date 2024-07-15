@@ -8,55 +8,27 @@ let cors=require('cors');
 let app=express();
 app.use(express.json());
 app.use(cors({
-    origin:['http://localhost:3000','https://loudmusics.vercel.app'],
-    credentials: true, // Allow cookies and authentication headers
-}));
+    origin: ['http://localhost:3000','https://loudmusics.vercel.app/'], // Your frontend's origin
+    credentials: true,
+    }
+));
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
 function encoding(email,password){
     return jwt.sign(password,email);
 } 
-app.post('/login', async (req, res) => {
+app.post('/login',async(req,res)=>{
     console.log(req.body);
-    try {
-        let result = await model.findOne({ email: req.body.email, password: encoding(req.body.email, req.body.password) });
-        console.log(result);
-        if (result) {
-            // Example of setting cookies based on browser compatibility
-            const cookieSettings = {
-                maxAge: 900 * 2000,  // Adjust as needed
-                httpOnly: true,
-                secure: true,  // Ensure cookies are only sent over HTTPS
-                sameSite:'Lax'
-            };
-
-            //Set the appropriate SameSite attribute based on browser
-            const userAgent = req.headers['user-agent'];
-            if (userAgent.includes('Chrome/') || userAgent.includes('Chromium/')) {
-                console.log("Chrome");
-                // Google Chrome and Chromium-based browsers
-                cookieSettings.sameSite = 'None';
-            } else if (userAgent.includes('Firefox/')) {
-                // Mozilla Firefox
-                console.log("FireFox");
-                cookieSettings.sameSite = 'Lax';
-            } else {
-                console.log("Safari");
-                // Default to Strict for other browsers (including Safari)
-                cookieSettings.sameSite = 'Strict';
-            }
-
-            res.cookie('auth', JSON.stringify({ email: result.email }), cookieSettings).send({ message: "Cookie Set" });
-        } else {
-            res.sendStatus(401);
-        }
-        console.log("Done");
-    } catch (err) {
-        console.error(err);  // Log the error for debugging
+    try{
+       let result=await model.findOne({email:req.body.email,password:encoding(req.body.email,req.body.password)});
+       console.log(result);
+       (result)?res.status(200).cookie("auth",JSON.stringify({email:result.email}),{ maxAge: 900 * 2000, httpOnly: false, sameSite: 'Lax', secure: false }).send({message:"Cookie Setted"}):res.sendStatus(401);
+       console.log("DOne   ",req.cookies.auth);
+    }
+    catch(err){
         res.sendStatus(500);
     }
-});
-
+})
 app.post('/signup',async (req,res)=>{
     try{
         let check= await model.findOne({email:req.body.email});
