@@ -3,16 +3,10 @@ let mongoose=require('mongoose');
 let {model}=require('./Model');
 let jwt=require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const cookieParser = require('cookie-parser');
 let cors=require('cors');
 let app=express();
 app.use(express.json());
-app.use(cors({
-    origin: ['http://localhost:3000','https://loudmusics.vercel.app'], // Your frontend's origin
-    credentials: true,
-    }
-));
-app.use(cookieParser());
+app.use(cors());
 app.use(express.urlencoded({extended:true}));
 function encoding(email,password){
     return jwt.sign(password,email);
@@ -22,7 +16,7 @@ app.post('/login',async(req,res)=>{
     try{
        let result=await model.findOne({email:req.body.email,password:encoding(req.body.email,req.body.password)});
        console.log(result);
-       (result)?res.status(200).cookie("auth",JSON.stringify({email:result.email}),{ maxAge: 900 * 2000, httpOnly: false, sameSite: 'Lax', secure: true }).send({message:"Cookie Setted"}):res.sendStatus(401);
+       (result)?res.status(200).json({email:result.email}):res.sendStatus(401);
        console.log("DOne   ",req.cookies.auth);
     }
     catch(err){
