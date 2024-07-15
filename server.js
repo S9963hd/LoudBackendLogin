@@ -17,7 +17,7 @@ app.post('/login',async(req,res)=>{
        let result=await model.findOne({email:req.body.email,password:encoding(req.body.email,req.body.password)});
        console.log(result);
        (result)?res.status(200).json({email:result.email}):res.sendStatus(401);
-       console.log("DOne   ",req.cookies.auth);
+       console.log("DOne   ",result.email);
     }
     catch(err){
         res.sendStatus(500);
