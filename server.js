@@ -11,7 +11,7 @@ app.use(express.urlencoded({extended:true}));
 function encoding(email,password){
     return jwt.sign(password,email);
 } 
-app.post('/login',async(req,res)=>{
+app.post('/login',(req,res)=>{
     console.log(req.body);
     try{
        let result=await model.findOne({email:req.body.email,password:encoding(req.body.email,req.body.password)});
